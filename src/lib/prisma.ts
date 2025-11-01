@@ -11,15 +11,15 @@ neonConfig.poolQueryViaFetch = true; // inngest
 
 // Type definitions
 declare global {
-  var prisma: PrismaClient | undefined;
+  var GlobalPrisma: PrismaClient | undefined;
 }
 
 const connectionString = `${process.env.DATABASE_URL}`;
 
 const adapter = new PrismaNeon({ connectionString });
-const Prisma = global.prisma || new PrismaClient({ adapter });
+const Prisma = global.GlobalPrisma || new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV === 'development') global.prisma = prisma;
+if (process.env.NODE_ENV === 'development') global.GlobalPrisma = Prisma ;
 
 export default Prisma;
 export type Prisma = typeof Prisma;
