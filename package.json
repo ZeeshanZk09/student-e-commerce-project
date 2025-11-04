@@ -9,7 +9,8 @@
     "lint": "biome check",
     "format": "biome format --write",
     "prisma:migrate:dev": "npx prisma migrate dev --schema=prisma/schema.prisma",
-    "prisma:generate": "npx prisma generate --schema=prisma/schema.prisma"
+    "prisma:generate": "npx prisma generate --schema=prisma/schema.prisma",
+    "inngest:dev": "npx inngest-cli@latest dev --no-discovery -u http://localhost:3000/api/inngest"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.34.0",
@@ -37,6 +38,7 @@
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
     "bufferutil": "^4.0.9",
+    "lightningcss": "^1.30.2",
     "prisma": "^6.18.0",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -6,6 +6,7 @@ type RawEvent = any;
 function logInfo(tag: string, obj?: any, ...args: any[]) {
   console.log(`${new Date().toISOString()} [info] [${tag}]`, obj ?? '', ...args);
 }
+
 function logError(tag: string, obj?: any, ...args: any[]) {
   console.error(`${new Date().toISOString()} [error] [${tag}]`, obj ?? '', ...args);
 }
@@ -178,68 +179,69 @@ async function upsertUserToDb(user: any) {
 
 /* --- Inngest functions --- */
 
-export const syncUserCreation = inngest.createFunction(
-  { id: 'sync-user-creation' },
-  { event: 'clerk/user.created' },
-  async ({ event }) => {
-    logInfo(
-      'syncUserCreation',
-      'event.name=',
-      event?.name,
-      'event.type=',
-      (event as any)?.type,
-      'event.data?.type=',
-      event?.data?.type
-    );
+// export const syncUserCreation = inngest.createFunction(
+//   { id: 'sync-user-creation' },
+//   { event: 'user.created' },
+//   async ({ event }) => {
+//     debugger;
+//     logInfo(
+//       'syncUserCreation',
+//       'event.name=',
+//       event?.name,
+//       'event.type=',
+//       (event as any)?.type,
+//       'event.data?.type=',
+//       event?.data?.type
+//     );
 
-    // if this is not a Clerk user.created payload, skip
-    const incomingType = (event as any)?.type ?? event?.data?.type ?? event?.name;
-    if (!String(incomingType).includes('user.created')) {
-      logInfo('syncUserCreation', `Skipping non-user.created event: ${incomingType}`);
-      return;
-    }
-    logInfo('syncUserCreation', {
-      note: 'received event',
-      id: event?.id,
-      name: event?.name ?? undefined,
-    });
-    logInfo('syncUserCreation', {
-      rawEventSummary: { dataKeys: Object.keys(event?.data ?? {}), ts: event?.ts },
-    });
+//     // if this is not a Clerk user.created payload, skip
+//     const incomingType = event?.name ?? (event as any)?.type ?? event?.data?.type;
+//     if (!String(incomingType).includes('user.created')) {
+//       logInfo('syncUserCreation', `Skipping non-user.created event: ${incomingType}`);
+//       //   return;
+//     }
+//     logInfo('syncUserCreation', {
+//       note: 'received event',
+//       id: event?.id,
+//       name: event?.name ?? undefined,
+//     });
+//     logInfo('syncUserCreation', {
+//       rawEventSummary: { dataKeys: Object.keys(event?.data ?? {}), ts: event?.ts },
+//     });
 
-    const candidate = extractFromCommonPlaces(event);
-    logInfo('syncUserCreation', { extractedCandidate: candidate });
+//     const candidate = extractFromCommonPlaces(event);
+//     logInfo('syncUserCreation', { extractedCandidate: candidate });
 
-    let user = candidate;
+//     let user = candidate;
 
-    // if no id but we have email, try Clerk Admin API to fetch full user
-    if (!user.id && user.email) {
-      logInfo(
-        'syncUserCreation',
-        `id missing but email present (${user.email}) — attempting Clerk API lookup`
-      );
-      const clerkUser = await fetchClerkUserByEmail(user.email);
-      if (clerkUser) {
-        user = { ...user, ...clerkUser }; // clerkUser contains id, name, etc.
-        logInfo('syncUserCreation', { afterClerkLookup: user });
-      } else {
-        logInfo(
-          'syncUserCreation',
-          'Clerk lookup returned no user; continuing with what we have (will not upsert without id)'
-        );
-      }
-    }
+//     // if no id but we have email, try Clerk Admin API to fetch full user
+//     if (!user.id && user.email) {
+//       logInfo(
+//         'syncUserCreation',
+//         `id missing but email present (${user.email}) — attempting Clerk API lookup`
+//       );
+//       const clerkUser = await fetchClerkUserByEmail(user.email);
+//       if (clerkUser) {
+//         user = { ...user, ...clerkUser }; // clerkUser contains id, name, etc.
+//         logInfo('syncUserCreation', { afterClerkLookup: user });
+//       } else {
+//         logInfo(
+//           'syncUserCreation',
+//           'Clerk lookup returned no user; continuing with what we have (will not upsert without id)'
+//         );
+//       }
+//     }
 
-    if (!user.id) {
-      logError(
-        'syncUserCreation',
-        'missing user.id — cannot create/upsert row. Full event:',
-        event
-      );
-      return;
-    }
-  }
-);
+//     if (!user.id) {
+//       logError(
+//         'syncUserCreation',
+//         'missing user.id — cannot create/upsert row. Full event:',
+//         event
+//       );
+//       return;
+//     }
+//   }
+// );
 // function extractFromCommonPlaces(event: any) {
 //   // Try common shapes: event.data, event.data.user, event.data.user_id, event.data.userId, event.data.clerkUser, event.data.user_object, event.data.user?.id
 //   const data = event?.data ?? event;
@@ -355,85 +357,75 @@ export const syncUserCreation = inngest.createFunction(
 //   }
 // }
 
-// export const syncUserCreation = inngest.createFunction(
-//   { id: 'sync-user-creation' },
-//   { event: 'inngest/function.invoked' },
-//   async ({ event }) => {
-//     try {
-//       await upsertUserToDb(user);
-//     } catch (err) {
-//       // Important: decide if you want to rethrow to surface failure to Inngest
-//       logError('syncUserCreation', 'upsert failed', err);
-//       // Option: throw err; // uncomment if you want Inngest to mark the run as failed
-//       // if this is not a Clerk user.created payload, skip
-//       const incomingType = (event as any)?.type ?? event?.data?.type ?? event?.name;
-//       if (!String(incomingType).includes('user.created')) {
-//         logInfo('syncUserCreation', `Skipping non-user.created event: ${incomingType}`);
-//         return;
-//       }
-//       logInfo('syncUserCreation', {
-//         note: 'received event',
-//         id: event?.id,
-//         name: event?.name ?? undefined,
-//       });
-//       logInfo('syncUserCreation', {
-//         rawEventSummary: { dataKeys: Object.keys(event?.data ?? {}), ts: event?.ts },
-//       });
+export const syncUserCreation = inngest.createFunction(
+  { id: 'sync-user-creation' },
+  { event: 'clerk/user.created' },
+  async ({ event }) => {
+    try {
+      logInfo(
+        'syncUserCreation',
+        'event.name=',
+        event?.name,
+        'event.type=',
+        (event as any)?.type,
+        'event.data?.type=',
+        event?.data?.type
+      );
 
-//       const candidate = extractFromCommonPlaces(event);
-//       logInfo('syncUserCreation', { extractedCandidate: candidate });
+      // if this is not a Clerk user.created payload, skip
+      const incomingType = event?.name ?? (event as any)?.type ?? event?.data?.type;
+      if (!String(incomingType).includes('user.created')) {
+        logInfo('syncUserCreation', `Skipping non-user.created event: ${incomingType}`);
+        return;
+      }
+      logInfo('syncUserCreation', {
+        note: 'received event',
+        id: event?.id,
+        name: event?.name ?? undefined,
+      });
+      logInfo('syncUserCreation', {
+        rawEventSummary: { dataKeys: Object.keys(event?.data ?? {}), ts: event?.ts },
+      });
 
-//       let user = candidate;
+      const candidate = extractFromCommonPlaces(event);
+      logInfo('syncUserCreation', { extractedCandidate: candidate });
 
-//       // if no id but we have email, try Clerk Admin API to fetch full user
-//       if (!user.id && user.email) {
-//         logInfo(
-//           'syncUserCreation',
-//           `id missing but email present (${user.email}) — attempting Clerk API lookup`
-//         );
-//         const clerkUser = await fetchClerkUserByEmail(user.email);
-//         if (clerkUser) {
-//           user = { ...user, ...clerkUser }; // clerkUser contains id, name, etc.
-//           logInfo('syncUserCreation', { afterClerkLookup: user });
-//         } else {
-//           logInfo(
-//             'syncUserCreation',
-//             'Clerk lookup returned no user; continuing with what we have (will not upsert without id)'
-//           );
-//         }
-//       }
+      let user = candidate;
 
-//       if (!user.id) {
-//         logError(
-//           'syncUserCreation',
-//           'missing user.id — cannot create/upsert row. Full event:',
-//           event
-//         );
-//         return;
-//       }
+      // if no id but we have email, try Clerk Admin API to fetch full user
+      if (!user.id && user.email) {
+        logInfo(
+          'syncUserCreation',
+          `id missing but email present (${user.email}) — attempting Clerk API lookup`
+        );
+        const clerkUser = await fetchClerkUserByEmail(user.email);
+        if (clerkUser) {
+          user = { ...user, ...clerkUser }; // clerkUser contains id, name, etc.
+          logInfo('syncUserCreation', { afterClerkLookup: user });
+        } else {
+          logInfo(
+            'syncUserCreation',
+            'Clerk lookup returned no user; continuing with what we have (will not upsert without id)'
+          );
+        }
+      }
 
-//       // const result = await Prisma.user.upsert({
-//       //   where: { id: user.id },
-//       //   update: {
-//       //     name: user.name ?? null,
-//       //     email: user.email ?? null,
-//       //     image: user.image ?? null,
-//       //   },
-//       //   create: {
-//       //     id: user.id,
-//       //     name: user.name ?? 'Unknown User',
-//       //     email: user.email ?? `unknown+${user.id}@example.com`,
-//       //     image: user.image ?? null,
-//       //   },
-//       // });
-//       }
-// //      catch (error) {
-// //       console.error(error);
-// //       logError('sync-user-creation', error);
-// // >>>>>>> 3b4a3a5 (deploy-test)
-// //     }
-//   }
-// );
+      if (!user.id) {
+        logError(
+          'syncUserCreation',
+          'missing user.id — cannot create/upsert row. Full event:',
+          event
+        );
+        return;
+      }
+      await upsertUserToDb(user);
+    } catch (err) {
+      // Important: decide if you want to rethrow to surface failure to Inngest
+      logError('syncUserCreation', 'upsert failed', err);
+      throw err;
+    }
+  }
+);
 
 export const syncUserUpdation = inngest.createFunction(
   { id: 'sync-user-updation' },

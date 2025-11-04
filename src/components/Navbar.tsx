@@ -1,14 +1,14 @@
 'use client';
 import { useAppSelector } from '@/lib/redux/hooks';
 import { useClerk, UserButton, useUser } from '@clerk/nextjs';
-import { ListOrdered, Search, Shield, ShoppingCart } from 'lucide-react';
+import { ListOrdered, Search, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const Navbar = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useUser(); // use => hook
   const { openSignIn } = useClerk();
   const [search, setSearch] = useState('');
   const cartCount = useAppSelector((state) => state.cart.total);
