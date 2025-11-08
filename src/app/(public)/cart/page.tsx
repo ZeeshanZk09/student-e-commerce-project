@@ -74,8 +74,8 @@ export default function Cart() {
                     <div className='flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md'>
                       <Image
                         src={
-                          (Array.isArray(item.product.connect?.images) &&
-                            (item.product.connect?.images[0] as string)) ||
+                          (Array.isArray(item.product?.images) &&
+                            (item.product?.images[0] as string)) ||
                           ''
                         }
                         className='h-14 w-auto'

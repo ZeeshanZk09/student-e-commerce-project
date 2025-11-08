@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Loading from '@/components/Loading';
-import { Store } from '@/generated/prisma/browser';
-import { StoreCreateInput } from '@/generated/prisma/models';
+// import { Store } from '@/generated/prisma/browser';
+// import { StoreCreateInput } from '@/generated/prisma/models';
 
 export default function CreateStore() {
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
@@ -13,22 +13,14 @@ export default function CreateStore() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  const [storeInfo, setStoreInfo] = useState<StoreCreateInput>({
+  const [storeInfo, setStoreInfo] = useState<any>({
     name: '',
     description: '',
     username: '',
     address: '',
     email: '',
     contact: '',
-    status: 'pending',
-    isActive: false,
-    updatedAt: new Date(),
-    createdAt: new Date(),
     logo: '',
-    user: { connect: { id: '' } },
-    Product: { create: [] },
-    Order: { create: [] },
-    id: '',
   });
 
   const onChangeHandler = (
