@@ -60,7 +60,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    sendSuccessResponse(200, 'Store created successfully', createStore);
+    // admin => seller ? approve ? reject
+    // await Prisma.user.update({
+    //   where: { id: userId },
+    //   data: {
+    //     role: 'SELLER',
+    //   },
+    // });
+
+    return sendSuccessResponse(200, 'Store created successfully');
   } catch (err: any) {
     if (err instanceof ImageKitUploadNetworkError) sendErrorResponse(400, 'Image upload failed');
     console.error('[API] error', err);
@@ -87,7 +95,31 @@ export async function GET(request: NextRequest) {
     const store = await Prisma.store.findUnique({
       where: { userId },
     });
-    if (!store) return sendErrorResponse(404, 'Store not found');
-    return sendSuccessResponse(200, 'Store fetched successfully', store);
-  } catch (error) {}
+    if (!store)
+      return sendSuccessResponse(200, 'Store not found', {
+        store: null,
+        storeStatus: null,
+        storeIsActive: false,
+      });
+    return sendSuccessResponse(200, 'Store fetched successfully', {
+      store,
+      storeStatus: store.status,
+      storeIsActive: store.isActive,
+    });
+  } catch (err: any) {
+    if (err instanceof ImageKitUploadNetworkError) sendErrorResponse(400, 'Image upload failed');
+    console.error('[API] error', err);
+
+    // detect Neon/Prisma network/connect-timeout errors (relaxed check)
+    const isNetworkErr =
+      err?.message?.includes('fetch failed') ||
+      err?.cause?.code === 'UND_ERR_CONNECT_TIMEOUT' ||
+      err?.name === 'NeonDbError' ||
+      err?.code === 'ENOTFOUND';
+
+    if (isNetworkErr) {
+      return sendErrorResponse(503, isNetworkErr ? 'Service Unavailable' : err.message);
+    }
+    return sendErrorResponse(500, err instanceof Error ? err.message : 'Something went wrong');
+  }
 }
