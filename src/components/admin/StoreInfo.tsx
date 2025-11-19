@@ -59,13 +59,13 @@ const StoreInfo = ({ store }: { store: StoreCreateInput }) => {
         <Image
           width={36}
           height={36}
-          src={store.user.connect?.image as string}
-          alt={store.user.connect?.name as string}
+          src={store.user?.image as string}
+          alt={store.user?.name as string}
           className='w-9 h-9 rounded-full'
         />
         <div>
-          <p className='text-slate-600 font-medium'>{store.user?.connect?.name as string}</p>
-          <p className='text-slate-400'>{store.user?.connect?.email as string}</p>
+          <p className='text-slate-600 font-medium'>{store.user?.name as string}</p>
+          <p className='text-slate-400'>{store.user?.email as string}</p>
         </div>
       </div>
     </div>

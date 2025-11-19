@@ -46,8 +46,7 @@ export async function POST(request: NextRequest) {
       fileName: logoFile.name,
       folder: 'e-com/store-logos',
     });
-
-    const createStore = await Prisma.store.create({
+    await Prisma.store.create({
       data: {
         userId,
         name,

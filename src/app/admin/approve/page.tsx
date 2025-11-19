@@ -6,18 +6,35 @@ import { Store } from '@/generated/prisma/browser';
 import { StoreCreateInput } from '@/generated/prisma/models';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function AdminApprove() {
   const [stores, setStores] = useState<Store[] | StoreCreateInput[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchStores = async () => {
-    setStores(storesDummyData as any);
-    setLoading(false);
+    try {
+      const response = await axios.get('/api/admin/approve-store');
+      console.log(response.data);
+      setStores(response.data.data);
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApprove = async ({ storeId, status }: { storeId: string; status: string }) => {
-    // Logic to approve a store
+    try {
+      const response = await axios.post('/api/admin/approve-store', {
+        storeId,
+        status,
+      });
+      console.log(response.data);
+      setStores(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {

@@ -1,45 +1,60 @@
-'use client';
-import { dummyAdminDashboardData } from './../../../public/assets/assets';
-import Loading from '@/components/Loading';
 import OrdersAreaChart from '@/components/OrdersAreaChart';
 import { CircleDollarSignIcon, ShoppingBasketIcon, StoreIcon, TagsIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { auth } from '@clerk/nextjs/server';
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
   const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<{
-    products: number;
-    revenue: string;
-    orders: number;
-    stores: number;
-    allOrders: any[];
-  }>({
+  // Clerk server-side
+  const { userId, getToken } = await auth();
+
+  const token = await getToken();
+
+  // Default dashboard data
+  let dashboardData = {
     products: 0,
-    revenue: '',
+    revenue: 0,
     orders: 0,
     stores: 0,
     allOrders: [],
-  });
+  };
 
+  if (userId) {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        console.log(data.data.revenue._sum.total);
+        dashboardData = {
+          products: data.data.products.length,
+          stores: data.data.stores.length,
+          orders: data.data.orders.length,
+          allOrders: data.data.allOrders,
+          revenue: data.data.revenue._sum.total ?? 0,
+        };
+      }
+    } catch (error) {
+      console.log('Error fetching dashboard data:', error);
+    }
+  }
+  console.log(dashboardData);
   const dashboardCardsData = [
     { title: 'Total Products', value: dashboardData.products, icon: ShoppingBasketIcon },
-    { title: 'Total Revenue', value: currency + dashboardData.revenue, icon: CircleDollarSignIcon },
+    {
+      title: 'Total Revenue',
+      value: currency + dashboardData.revenue,
+      icon: CircleDollarSignIcon,
+    },
     { title: 'Total Orders', value: dashboardData.orders, icon: TagsIcon },
     { title: 'Total Stores', value: dashboardData.stores, icon: StoreIcon },
   ];
-
-  const fetchDashboardData = async () => {
-    setDashboardData(dummyAdminDashboardData);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  if (loading) return <Loading />;
 
   return (
     <div className='text-slate-500'>
@@ -60,7 +75,7 @@ export default function AdminDashboard() {
             </div>
             <card.icon
               size={50}
-              className=' w-11 h-11 p-2.5 text-slate-400 bg-slate-100 rounded-full'
+              className='w-11 h-11 p-2.5 text-slate-400 bg-slate-100 rounded-full'
             />
           </div>
         ))}
