@@ -1,23 +1,11 @@
-'use client';
-import { useAppSelector } from '@/lib/redux/hooks';
-import { useClerk, UserButton, useUser } from '@clerk/nextjs';
-import { ListOrdered, Search, ShoppingCart } from 'lucide-react';
+import { ListOrdered, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import SearchInput from './SearchInput';
+import NavClientMobile, { NavClientDesktop } from './NavClient';
+import { auth } from '@clerk/nextjs/server';
 
-const Navbar = () => {
-  const router = useRouter();
-  const { user } = useUser(); // use => hook
-  const { openSignIn } = useClerk();
-  const [search, setSearch] = useState('');
-  const cartCount = useAppSelector((state) => state.cart.total);
-
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    router.push(`/shop?search=${search}`);
-  };
-
+export default async function Navbar() {
+  const { userId } = await auth();
   return (
     <nav className='relative bg-white'>
       <div className='mx-6'>
@@ -37,84 +25,16 @@ const Navbar = () => {
             <Link href='/'>About</Link>
             <Link href='/'>Contact</Link>
 
-            <form
-              onSubmit={handleSearch}
-              className='hidden xl:flex items-center w-xs text-sm gap-2 bg-slate-100 px-4 py-3 rounded-full'
-            >
-              <Search size={18} className='text-slate-600' />
-              <input
-                className='w-full bg-transparent outline-none placeholder-slate-600'
-                type='text'
-                placeholder='Search products'
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                required
-              />
-            </form>
+            <SearchInput />
 
-            <Link href='/cart' className='relative flex items-center gap-2 text-slate-600'>
-              <ShoppingCart size={18} />
-              Cart
-              <button className='absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full'>
-                {cartCount}
-              </button>
-            </Link>
-
-            {user ? (
-              <UserButton>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    labelIcon={<ListOrdered size={16} />}
-                    label='My Orders'
-                    onClick={() => router.push('/orders')}
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
-            ) : (
-              <button
-                onClick={() => openSignIn()}
-                className='px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full'
-              >
-                Login
-              </button>
-            )}
+            <NavClientDesktop userId={userId} />
           </div>
 
           {/* Mobile User Button  */}
-          <div className='sm:hidden'>
-            {user ? (
-              <>
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      labelIcon={<ShoppingCart size={16} />}
-                      label='Cart'
-                      onClick={() => router.push('/cart')}
-                    />
-                  </UserButton.MenuItems>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      labelIcon={<ListOrdered size={16} />}
-                      label='My Orders'
-                      onClick={() => router.push('/orders')}
-                    />
-                  </UserButton.MenuItems>
-                </UserButton>
-              </>
-            ) : (
-              <button
-                onClick={() => openSignIn()}
-                className='px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full'
-              >
-                Login
-              </button>
-            )}
-          </div>
+          <NavClientMobile userId={userId} />
         </div>
       </div>
       <hr className='border-gray-300' />
     </nav>
   );
-};
-
-export default Navbar;
+}
