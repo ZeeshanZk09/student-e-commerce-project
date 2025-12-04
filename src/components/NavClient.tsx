@@ -2,16 +2,24 @@
 import { useClerk, UserButton, useUser } from '@clerk/nextjs';
 import { ListOrdered, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function NavClientDesktop({ userId }: { userId: string | null }) {
   const { openSignIn } = useClerk();
-
+  const [user, setUser] = useState(false);
   const router = useRouter();
-  //   const { user } = useUser();
+
+  useEffect(() => {
+    if (userId) {
+      setUser(true);
+    } else {
+      setUser(false);
+    }
+  }, []);
 
   return (
     <>
-      {userId ? (
+      {user ? (
         <UserButton>
           <UserButton.MenuItems>
             <UserButton.Action
@@ -35,12 +43,20 @@ export function NavClientDesktop({ userId }: { userId: string | null }) {
 
 export default function NavClientMobile({ userId }: { userId: string | null }) {
   const { openSignIn } = useClerk();
-
+  const [user, setUser] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (userId) {
+      setUser(true);
+    } else {
+      setUser(false);
+    }
+  }, []);
 
   return (
     <div className='sm:hidden'>
-      {userId ? (
+      {user ? (
         <>
           <UserButton>
             <UserButton.MenuItems>
