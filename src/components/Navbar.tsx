@@ -2,9 +2,14 @@ import Link from 'next/link';
 import SearchInput from './SearchInput';
 import NavClientMobile, { NavClientDesktop } from './NavClient';
 import { auth } from '@clerk/nextjs/server';
+import { authAdmin } from '@/lib/middlewares/authAdmin';
+import authSeller from '@/lib/middlewares/authSeller';
+import CartCount from './CartCount';
 
 export default async function Navbar() {
   const { userId } = await auth();
+  const isAdmin = await authAdmin(userId!);
+  const isSeller = await authSeller(userId!);
   return (
     <nav className='relative bg-white'>
       <div className='mx-6'>
@@ -25,12 +30,12 @@ export default async function Navbar() {
             <Link href='/'>Contact</Link>
 
             <SearchInput />
-
-            <NavClientDesktop userId={userId} />
+            <CartCount />
+            <NavClientDesktop userId={userId} isAdmin={isAdmin} isSeller={isSeller} />
           </div>
 
           {/* Mobile User Button  */}
-          <NavClientMobile userId={userId} />
+          <NavClientMobile userId={userId} isAdmin={isAdmin} isSeller={isSeller} />
         </div>
       </div>
       <hr className='border-gray-300' />
