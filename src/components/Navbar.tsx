@@ -6,10 +6,13 @@ import { authAdmin } from '@/lib/middlewares/authAdmin';
 import authSeller from '@/lib/middlewares/authSeller';
 import CartCount from './CartCount';
 
+export const revalidate = 0;
+
 export default async function Navbar() {
   const { userId } = await auth();
   const isAdmin = await authAdmin(userId!);
   const isSeller = await authSeller(userId!);
+  console.log('is user is seller or not: ', isSeller);
   return (
     <nav className='relative bg-white'>
       <div className='mx-6'>

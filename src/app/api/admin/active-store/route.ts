@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: 'desc',
       },
+      include: {
+        user: true,
+      },
     });
 
     return sendSuccessResponse(200, 'Stores', stores);

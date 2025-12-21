@@ -1,7 +1,8 @@
+import { User } from '@/generated/prisma/client';
 import Prisma from '../prisma';
 import { logError, logInfo } from './debug';
 
-async function upsertUserToDb(user: any) {
+async function upsertUserToDb(user: User): Promise<User | null> {
   if (!user?.id) {
     logError('upsertUserToDb', 'no user.id to upsert; skip', user);
     return null;

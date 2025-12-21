@@ -59,14 +59,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // admin => seller ? approve ? reject
-    // await Prisma.user.update({
-    //   where: { id: userId },
-    //   data: {
-    //     role: 'SELLER',
-    //   },
-    // });
-
     return sendSuccessResponse(200, 'Store created successfully');
   } catch (err: any) {
     if (err instanceof ImageKitUploadNetworkError) sendErrorResponse(400, 'Image upload failed');

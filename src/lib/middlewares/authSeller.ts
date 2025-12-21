@@ -10,16 +10,17 @@ export default async function authSeller(userId: string): Promise<
   | false
 > {
   try {
+    if (!userId) return false;
     const user = await prisma.user.findFirst({
       where: {
         id: userId,
-        role: 'SELLER',
+        isSeller: true,
       },
       include: {
         store: true,
       },
     });
-
+    console.log('user is seller or not check-in server: ', user);
     if (user?.store) {
       if (user.store.status === 'approved' && user.store.isActive) {
         return {

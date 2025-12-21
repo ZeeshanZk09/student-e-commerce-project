@@ -1,8 +1,6 @@
 'use client';
 import Image from 'next/image';
 import { MapPin, Mail, Phone } from 'lucide-react';
-import { Store } from '@/generated/prisma/browser';
-import { StoreCreateInput, StoreModel } from '@/generated/prisma/models';
 
 function safeImageSrc(src?: string) {
   if (!src || typeof src !== 'string') return '/placeholder-40.png'; // local fallback
@@ -12,7 +10,8 @@ function safeImageSrc(src?: string) {
   return '/placeholder-40.png';
 }
 
-const StoreInfo = ({ store }: { store: StoreCreateInput }) => {
+const StoreInfo = ({ store }: { store: any }) => {
+  console.log(store);
   return (
     <div className='flex-1 space-y-2 text-sm'>
       <Image
