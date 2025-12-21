@@ -72,9 +72,9 @@ export default function Cart() {
                 <tr key={index} className='space-x-2'>
                   <td className='flex gap-3 my-4'>
                     <div className='flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md'>
-                      <Image
+                      {/* <Image
                         src={
-                          (Array.isArray(item.product?.images) &&
+                          (Array.isArray(item?.product?.) &&
                             (item.product?.images[0] as string)) ||
                           ''
                         }
@@ -82,7 +82,7 @@ export default function Cart() {
                         alt=''
                         width={45}
                         height={45}
-                      />
+                      /> */}
                     </div>
                     <div>
                       <p className='max-sm:text-sm'>{item.product?.connect?.name! as string}</p>
