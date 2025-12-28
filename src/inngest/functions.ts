@@ -1,7 +1,7 @@
 import Prisma from '@/lib/prisma';
 import { inngest } from './client';
 import { logError, logInfo } from '@/lib/helpers/debug';
-import { upsertUserToDb } from '@/lib/helpers/user';
+import { updateUser, createUser } from '@/lib/helpers/user';
 
 export const syncUserCreation = inngest.createFunction(
   { id: 'sync-user-creation' },
@@ -29,7 +29,12 @@ export const syncUserCreation = inngest.createFunction(
         );
         return;
       }
-      await upsertUserToDb(user);
+      await createUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      });
     } catch (err) {
       // Important: decide if you want to rethrow to surface failure to Inngest
       logError('syncUserCreation', 'upsert failed', err);
@@ -60,7 +65,12 @@ export const syncUserUpdation = inngest.createFunction(
     }
 
     try {
-      await upsertUserToDb(user);
+      await updateUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      });
     } catch (err) {
       logError('syncUserUpdation', 'upsert failed', err);
       throw err;

@@ -2,7 +2,7 @@ import { User } from '@/generated/prisma/client';
 import Prisma from '../prisma';
 import { logError, logInfo } from './debug';
 
-async function upsertUserToDb(user: User): Promise<User | null> {
+async function createUser(user: Partial<User>): Promise<User | null> {
   if (!user?.id) {
     logError('upsertUserToDb', 'no user.id to upsert; skip', user);
     return null;
@@ -26,25 +26,19 @@ async function upsertUserToDb(user: User): Promise<User | null> {
       typeof Prisma === 'object' ? 'exists' : 'missing'
     );
 
-    const result = await Prisma.user.upsert({
-      where: { id: user.id },
-      update: {
-        name: user.name ?? null,
-        email: user.email ?? null,
-        image: user.image ?? null,
-      },
-      create: {
+    const result = await Prisma.user.create({
+      data: {
         id: user.id,
-        name: user.name ?? 'Unknown User',
-        email: user.email ?? `unknown+${user.id}@example.com`,
-        image: user.image ?? null,
+        name: user.name!,
+        email: user.email!,
+        image: user.image!,
       },
     });
 
-    logInfo('upsertUserToDb', { ok: true, id: result.id });
+    logInfo('createUser', { ok: true, id: result.id });
     return result;
   } catch (err: any) {
-    logError('upsertUserToDb', {
+    logError('createUser', {
       error: err?.message ?? err,
       code: err?.code ?? null,
       meta: err?.meta ?? null,
@@ -53,4 +47,31 @@ async function upsertUserToDb(user: User): Promise<User | null> {
   }
 }
 
-export { upsertUserToDb };
+async function updateUser(user: Partial<User>): Promise<User | null> {
+  if (!user?.id) {
+    logError('updateUser', 'no user.id to update; skip', user);
+    return null;
+  }
+
+  try {
+    const result = await Prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: user.name!,
+        email: user.email!,
+        image: user.image!,
+      },
+    });
+    logInfo('updateUser', { ok: true, id: result.id });
+    return result;
+  } catch (err: any) {
+    logError('updateUser', {
+      error: err?.message ?? err,
+      code: err?.code ?? null,
+      meta: err?.meta ?? null,
+    });
+    throw err;
+  }
+}
+
+export { createUser, updateUser };
