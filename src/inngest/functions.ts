@@ -31,9 +31,9 @@ export const syncUserCreation = inngest.createFunction(
       }
       await createUser({
         id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email_addresses[0].email_address,
+        image: user.image_url,
       });
     } catch (err) {
       // Important: decide if you want to rethrow to surface failure to Inngest
