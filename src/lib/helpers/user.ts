@@ -7,7 +7,14 @@ async function createUser(user: Partial<User>): Promise<User | null> {
     logError('upsertUserToDb', 'no user.id to upsert; skip', user);
     return null;
   }
-
+  if (!user.email) {
+    logError('create user error', 'No Email provided:', user);
+    return null;
+  }
+  if (!user.name) {
+    logError('create user error', 'No Name provided:', user);
+    return null;
+  }
   try {
     function hideDbUrl(url?: string | null) {
       if (!url) return 'MISSING';
